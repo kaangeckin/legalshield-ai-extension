@@ -1,0 +1,67 @@
+[
+  {
+    "id": "zoom-ai-tos",
+    "name": "Zoom - Terms of Service (AI Model Training Clause)",
+    "text": "10.2 Service Generated Data and Customer Content. Zoom does not use your audio, video, or chat Customer Content to train our artificial intelligence models without your consent, EXCEPT that you agree that Zoom may process customer content for the purpose of training machine learning or artificial intelligence models to improve service quality, provide automated summaries, and system telemetry.",
+    "ground_truth_risks": [
+      {
+        "category": "Gizlilik",
+        "severity": "high",
+        "key_phrase": "customer content for the purpose of training machine learning or artificial intelligence models"
+      }
+    ]
+  },
+  {
+    "id": "spotify-privacy",
+    "name": "Spotify - Privacy Policy (Sensor & Partner Sharing)",
+    "text": "3. Information We Collect and Third-Party Disclosures. When you use the Spotify Service, we may collect technical data including your IP address, device motion characteristics, and approximate or exact coordinates. Specifically, we may share your precise location, sensor data, and listening history with advertising partners to personalize sponsored recommendations and audience measurement.",
+    "ground_truth_risks": [
+      {
+        "category": "Gizlilik",
+        "severity": "high",
+        "key_phrase": "share your precise location, sensor data, and listening history with advertising partners"
+      }
+    ]
+  },
+  {
+    "id": "instagram-ip-license",
+    "name": "Instagram / Meta - Terms of Use (Content Rights & IP)",
+    "text": "3.3 Permissions You Give Us. We do not claim ownership of your content, but you grant us a license to use it. When you share or upload content covered by intellectual property rights, you grant us a non-exclusive, royalty-free, transferable, sub-licensable, worldwide license to host, use, distribute, modify, run, copy, publicly perform or display your content in connection with our services.",
+    "ground_truth_risks": [
+      {
+        "category": "Fikri Mülkiyet",
+        "severity": "high",
+        "key_phrase": "a non-exclusive, royalty-free, transferable, sub-licensable, worldwide license to host, use, distribute, modify, run, copy, publicly perform or display"
+      }
+    ]
+  },
+  {
+    "id": "adobe-terms-scanning",
+    "name": "Adobe - General Terms of Use (Automated Content Analysis)",
+    "text": "4.1 Content Analysis. We may access, view, or listen to your content through both automated and manual methods, for example, to analyze your content using machine learning to improve our services and features. If you store files in Creative Cloud, our systems automatically index and process metadata and visual assets.",
+    "ground_truth_risks": [
+      {
+        "category": "Fikri Mülkiyet",
+        "severity": "high",
+        "key_phrase": "access, view, or listen to your content through both automated and manual methods, for example, to analyze your content using machine learning"
+      }
+    ]
+  },
+  {
+    "id": "saas-dark-pattern-subscription",
+    "name": "Dark-Pattern SaaS - Subscription & Arbitration",
+    "text": "7. Subscription Renewal and Dispute Resolution. All paid subscriptions will automatically renew for successive terms unless cancelled in writing at least 30 days prior to the expiration of the current billing cycle. By registering, you agree to resolve any dispute through binding individual arbitration and waive any right to participate in a class action lawsuit or jury trial.",
+    "ground_truth_risks": [
+      {
+        "category": "Otomatik Yenileme",
+        "severity": "high",
+        "key_phrase": "subscriptions will automatically renew for successive terms unless cancelled in writing at least 30 days prior"
+      },
+      {
+        "category": "Yargı Yetkisi",
+        "severity": "high",
+        "key_phrase": "you agree to resolve any dispute through binding individual arbitration and waive any right to participate in a class action lawsuit"
+      }
+    ]
+  }
+]

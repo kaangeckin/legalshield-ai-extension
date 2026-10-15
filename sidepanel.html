@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LegalShield AI - Sözleşme Denetim Paneli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-canvas: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-card: #182234;
+      --border-subtle: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #ef4444;
+      --indigo: #6366f1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      padding: 16px;
+      line-height: 1.5;
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: calc(100vh - 32px);
+    }
+
+    /* Top Brand Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Action Trigger */
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* Security Alert Banner */
+    .alert-banner {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .alert-icon { font-size: 18px; }
+    .alert-title { font-weight: 700; color: #f87171; font-size: 12px; margin-bottom: 2px; }
+    .alert-desc { font-size: 11px; color: #fca5a5; line-height: 1.4; }
+
+    /* Risk Score Gauge Card */
+    .score-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .score-circle {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-canvas);
+      border: 4px solid var(--border-subtle);
+      flex-shrink: 0;
+      transition: border-color 0.4s ease;
+    }
+    .score-circle.emerald { border-color: var(--emerald); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+    .score-circle.amber { border-color: var(--amber); box-shadow: 0 0 15px rgba(245, 158, 11, 0.2); }
+    .score-circle.rose { border-color: var(--rose); box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
+
+    .score-num { font-size: 24px; font-weight: 800; line-height: 1; }
+    .score-max { font-size: 10px; color: var(--text-muted); }
+    .score-info { display: flex; flex-direction: column; gap: 4px; }
+    .risk-badge {
+      display: inline-block;
+      align-self: flex-start;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .risk-badge.emerald { background: rgba(16, 185, 129, 0.15); color: var(--emerald); }
+    .risk-badge.amber { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+    .risk-badge.rose { background: rgba(239, 68, 68, 0.15); color: var(--rose); }
+
+    .score-title { font-size: 14px; font-weight: 700; }
+    .score-summary { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 11px;
+    }
+    .stats-val { font-weight: 700; color: #fff; }
+
+    /* Clauses List */
+    .clauses-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .clauses-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .clause-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+    .clause-card:hover {
+      border-color: #475569;
+    }
+    .clause-card.unverified-card {
+      border-left: 4px solid var(--rose);
+    }
+
+    .clause-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .clause-category {
+      font-size: 11px;
+      font-weight: 700;
+      color: #818cf8;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .confidence-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .clause-explanation {
+      font-size: 12px;
+      color: var(--text-main);
+      font-weight: 500;
+      line-height: 1.45;
+    }
+
+    /* Exact Quote Box: border-l-4 border-indigo-500 */
+    .quote-box {
+      border-left: 4px solid var(--indigo);
+      background: rgba(30, 41, 59, 0.7);
+      padding: 10px 12px;
+      border-radius: 0 8px 8px 0;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+    .quote-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .quote-tag {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .quote-tag.verified { color: var(--emerald); }
+    .quote-tag.unverified { color: var(--rose); }
+
+    .quote-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-style: italic;
+      color: #cbd5e1;
+    }
+
+    .clause-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn-highlight {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: #93c5fd;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .btn-highlight:hover {
+      background: var(--indigo);
+      color: #fff;
+      border-color: var(--indigo);
+    }
+
+    /* Ambiguity Box */
+    .ambiguity-card {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 11px;
+      color: #fde68a;
+    }
+    .ambiguity-head {
+      font-weight: 700;
+      color: #fbbf24;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Empty & Loading States */
+    .empty-state {
+      text-align: center;
+      padding: 40px 16px;
+      background: var(--bg-surface);
+      border: 1px dashed var(--border-subtle);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .empty-icon { font-size: 36px; }
+
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      gap: 12px;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border-subtle);
+      border-top-color: var(--indigo);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Mandatory Legal Disclaimer */
+    .disclaimer-card {
+      margin-top: auto;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 10px 12px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .disclaimer-text {
+      font-size: 11px;
+      font-weight: 600;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div>
+          <h1 class="brand-title">LegalShield AI</h1>
+          <p class="brand-sub">Sözleşme & Gizlilik Risk Denetçisi</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scan Trigger Button -->
+    <button id="btn-analyze" class="btn-primary">
+      <span>⚡</span>
+      <span>Sözleşmeyi Analiz Et</span>
+    </button>
+
+    <!-- Prompt Injection Security Alert -->
+    <div id="injection-alert-banner" class="alert-banner hidden">
+      <div class="alert-icon">⚠️</div>
+      <div>
+        <div class="alert-title">Prompt Injection Girişimi Engellendi!</div>
+        <div class="alert-desc" id="injection-alert-desc">Sözleşme içine gizlenen saldırı talimatları tespit edilerek bertaraf edildi. Güvenlik skoru koruma altına alındı.</div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="loading-state hidden">
+      <div class="spinner"></div>
+      <p id="loading-text" style="font-size: 12px; color: var(--text-muted);">Sözleşme taranıyor ve doğrulanıyor...</p>
+    </div>
+
+    <!-- Results Container -->
+    <main id="results-container" class="hidden" style="display: flex; flex-direction: column; gap: 14px;">
+      <!-- Risk Score Card -->
+      <section class="score-card" id="score-card">
+        <div class="score-circle" id="score-gauge">
+          <span class="score-num" id="score-value">0</span>
+          <span class="score-max">/100</span>
+        </div>
+        <div class="score-info">
+          <span class="risk-badge" id="risk-badge">Hesaplanıyor</span>
+          <h2 class="score-title" id="score-title">Genel Risk Seviyesi</h2>
+          <p class="score-summary" id="score-summary">Özet hazırlanıyor...</p>
+        </div>
+      </section>
+
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <span>Doğrulama Oranı: <strong class="stats-val" id="stat-rate">%100</strong></span>
+        <span>Doğrulanan Alıntı: <strong class="stats-val" id="stat-verified">0/0</strong></span>
+      </div>
+
+      <!-- Ambiguity Box -->
+      <div id="ambiguity-box" class="ambiguity-card hidden">
+        <div class="ambiguity-head">
+          <span>⚖️</span>
+          <strong>Muğlak / Yorum Gerektiren İfade</strong>
+        </div>
+        <p id="ambiguity-text"></p>
+      </div>
+
+      <!-- Risky Clauses List -->
+      <section>
+        <div class="clauses-header">Tespit Edilen Maddeler</div>
+        <div id="clauses-list" class="clauses-container" style="margin-top: 8px;">
+          <!-- Dynamically populated cards -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Empty Initial State -->
+    <div id="empty-state" class="empty-state">
+      <div class="empty-icon">📄</div>
+      <p style="font-weight: 600; font-size: 13px;">Analiz Bekleniyor</p>
+      <p style="font-size: 11px; color: var(--text-muted); max-width: 240px;">
+        Kullanım Şartları veya Gizlilik Politikası sayfasındayken yukarıdaki butona tıklayın.
+      </p>
+    </div>
+
+    <!-- Mandatory Legal Disclaimer Box -->
+    <footer class="disclaimer-card">
+      <p class="disclaimer-text" id="mandatory-disclaimer">
+        ⚠️ Bu uygulama yapay zeka tarafından üretilmiştir ve kesinlikle hukuki tavsiye niteliği taşımaz.
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // ─── DEMO / PREVIEW MODE ────────────────────────────────────────────────
+    // Chrome extension runtime dışında açıldığında otomatik olarak mock sonuç üretir.
+    const DEMO_REPORT = {
+      overall_risk_score: 87,
+      risk_level: 'Yüksek',
+      summary: 'Belgede 4 adet risk maddesi tespit edildi. Başlıca kategoriler: Gizlilik, Otomatik Yenileme, Yargı Yetkisi.',
+      ambiguity_notes: 'Sözleşmede "makul takdir yetkisi" ve "bildirim yapılmaksızın değişiklik" gibi tek taraflı muğlak ifadeler tespit edilmiştir.',
+      prompt_injection_detected: false,
+      validation_stats: { total: 4, verified: 3, unverified: 1, verificationRate: 75 },
+      risks: [
+        {
+          category: 'Gizlilik',
+          severity: 'high', confidence: 'high', verified: true,
+          plain_turkish: 'Şirket, kullanıcı içeriklerini kendi yapay zeka modellerini eğitmek amacıyla kullanma yetkisi talep ediyor.',
+          exact_quote: 'customer content for the purpose of training machine learning or artificial intelligence models',
+          potential_impact: 'Özel verilerinizin AI eğitim setlerine dahil edilmesi.',
+          verification_label: 'Alıntı Doğrulandı'
+        },
+        {
+          category: 'Otomatik Yenileme',
+          severity: 'high', confidence: 'high', verified: true,
+          plain_turkish: 'Abonelik dönem bitiminden en az 30 gün önce bildirilmezse otomatik yenilenir.',
+          exact_quote: 'subscriptions will automatically renew for successive terms unless cancelled in writing at least 30 days prior',
+          potential_impact: 'İstenmeyen yıllık abonelik kesintisi.',
+          verification_label: 'Alıntı Doğrulandı'
+        },
+        {
+          category: 'Yargı Yetkisi',
+          severity: 'high', confidence: 'high', verified: true,
+          plain_turkish: 'Mahkemeye başvurma ve toplu dava açma hakkınızdan feragat ederek bağlayıcı bireysel tahkimi kabul ediyorsunuz.',
+          exact_quote: 'you agree to resolve any dispute through binding individual arbitration and waive any right to participate in a class action lawsuit',
+          potential_impact: 'Hukuki hak arama yollarının kısıtlanması.',
+          verification_label: 'Alıntı Doğrulandı'
+        },
+        {
+          category: 'Diğer',
+          severity: 'medium', confidence: 'low', verified: false,
+          plain_turkish: 'Şirket sözleşme koşullarını herhangi bir ön bildirimde bulunmaksızın dilediği zaman tek taraflı değiştirme hakkını saklı tutar.',
+          exact_quote: 'we reserve the right to modify these terms at any time without notice in our reasonable discretion',
+          potential_impact: 'Kullanıcı aleyhine değişen kurallar.',
+          verification_label: 'Alıntı Doğrulanamadı',
+          unverified_warning: 'DİKKAT: Bu alıntı orijinal sözleşme metninde bulunamadı.'
+        }
+      ]
+    };
+
+    // Render helpers (inline — extension olmadan çalışır)
+    function getColorClass(score) {
+      return score >= 71 ? 'rose' : score >= 36 ? 'amber' : 'emerald';
+    }
+
+    function renderReport(report) {
+      document.getElementById('loading-state').classList.add('hidden');
+      document.getElementById('empty-state').classList.add('hidden');
+      const rc = document.getElementById('results-container');
+      rc.classList.remove('hidden');
+      rc.style.display = 'flex';
+
+      const score = report.overall_risk_score;
+      const cls = getColorClass(score);
+      document.getElementById('score-value').textContent = score;
+      const gauge = document.getElementById('score-gauge');
+      gauge.className = 'score-circle ' + cls;
+      const badge = document.getElementById('risk-badge');
+      badge.className = 'risk-badge ' + cls;
+      badge.textContent = cls === 'rose' ? 'Yüksek Risk' : cls === 'amber' ? 'Orta Risk' : 'Düşük Risk';
+      document.getElementById('score-title').textContent = cls === 'rose' ? 'Kritik Risk Durumu' : cls === 'amber' ? 'Dikkat Edilmesi Gereken Şartlar' : 'Standart Güvenli Seviye';
+      document.getElementById('score-summary').textContent = report.summary;
+
+      const stats = report.validation_stats;
+      document.getElementById('stat-rate').textContent = '%' + stats.verificationRate;
+      document.getElementById('stat-verified').textContent = stats.verified + '/' + stats.total;
+
+      if (report.ambiguity_notes) {
+        document.getElementById('ambiguity-box').classList.remove('hidden');
+        document.getElementById('ambiguity-text').textContent = report.ambiguity_notes;
+      }
+
+      if (report.prompt_injection_detected) {
+        document.getElementById('injection-alert-banner').classList.remove('hidden');
+      }
+
+      const list = document.getElementById('clauses-list');
+      list.innerHTML = '';
+      const icons = { 'Gizlilik':'🔒','Otomatik Yenileme':'🔄','Fikri Mülkiyet':'🎨','Yargı Yetkisi':'⚖️','Diğer':'📋' };
+      const confLabels = { 'high':'Yüksek Güven','medium':'Orta Güven','low':'Düşük Güven' };
+
+      report.risks.forEach((risk, i) => {
+        const card = document.createElement('div');
+        card.className = 'clause-card' + (risk.verified ? '' : ' unverified-card');
+        card.id = 'clause-card-' + i;
+        const icon = icons[risk.category] || '⚠️';
+        const conf = confLabels[risk.confidence] || risk.confidence;
+        card.innerHTML = `
+          <div class="clause-top">
+            <span class="clause-category">${icon} ${risk.category}</span>
+            <span class="confidence-badge">${conf}</span>
+          </div>
+          <p class="clause-explanation">${risk.plain_turkish}</p>
+          <div class="quote-box">
+            <div class="quote-header">
+              <span>Orijinal Alıntı</span>
+              <span class="quote-tag ${risk.verified ? 'verified' : 'unverified'}">
+                ${risk.verified ? '✅ Alıntı Doğrulandı' : '⚠️ Alıntı Doğrulanamadı'}
+              </span>
+            </div>
+            <div class="quote-text">"${risk.exact_quote}"</div>
+          </div>
+          <div class="clause-actions">
+            <button class="btn-highlight"><span>🔍</span> Sayfada Göster</button>
+          </div>`;
+        list.appendChild(card);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('btn-analyze');
+      const isExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id;
+
+      btn.addEventListener('click', () => {
+        document.getElementById('empty-state').classList.add('hidden');
+        document.getElementById('loading-state').classList.remove('hidden');
+        document.getElementById('loading-text').textContent = isExtension
+          ? 'Sözleşme taranıyor ve doğrulanıyor...'
+          : '🎭 Demo modu: Mock analiz yükleniyor...';
+
+        setTimeout(() => {
+          if (isExtension) {
+            chrome.runtime.sendMessage({ action: 'ANALYZE_CURRENT_PAGE' }, (response) => {
+              if (response && response.success) renderReport(response.data);
+              else { document.getElementById('loading-state').classList.add('hidden'); document.getElementById('empty-state').classList.remove('hidden'); }
+            });
+          } else {
+            renderReport(DEMO_REPORT);
+          }
+        }, isExtension ? 0 : 1400);
+      });
+    });
+  </script>
+</body>
+</html>

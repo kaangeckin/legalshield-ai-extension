@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LegalShield AI - Risk & Sözleşme Denetçisi</title>
+  <link rel="stylesheet" href="sidepanel.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-icon">🛡️</div>
+        <div>
+          <h1 class="brand-title">LegalShield AI</h1>
+          <p class="brand-subtitle">Deterministik Sözleşme Denetçisi</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-settings" class="icon-btn" title="Ayarlar ve API Anahtarı" aria-label="Ayarlar">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Context Pill -->
+    <div id="page-context-bar" class="page-context-bar">
+      <span class="status-dot"></span>
+      <span id="page-context-text" class="context-text">Aktif sekme inceleniyor...</span>
+    </div>
+
+    <!-- Main Trigger Bar -->
+    <div class="action-bar">
+      <button id="btn-analyze" class="primary-btn" id="analyze-button">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-text">Sözleşmeyi Analiz Et</span>
+      </button>
+    </div>
+
+    <!-- Security Injection Alert Banner (Hidden by default) -->
+    <div id="injection-alert-banner" class="alert-banner injection-alert hidden">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-body">
+        <strong>Prompt Injection Tespit Edildi!</strong>
+        <p id="injection-alert-desc">Sözleşme metninde yapay zekayı yanıltmaya çalışan gizli komutlar engellendi ve güvenlik kalkanı devrede.</p>
+      </div>
+    </div>
+
+    <!-- Loading Skeleton State -->
+    <div id="loading-state" class="loading-state hidden">
+      <div class="spinner"></div>
+      <p class="loading-title">Sayfa Taranıyor & Doğrulanıyor...</p>
+      <p class="loading-step" id="loading-step-text">DOM metni çıkarılıyor...</p>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+    </div>
+
+    <!-- Results Container (Hidden until analysis is ready) -->
+    <main id="results-container" class="results-container hidden">
+      <!-- Risk Score Card -->
+      <section class="score-card" id="score-card">
+        <div class="score-display">
+          <div class="score-gauge" id="score-gauge">
+            <span class="score-value" id="score-value">0</span>
+            <span class="score-total">/100</span>
+          </div>
+          <div class="score-details">
+            <span class="risk-badge" id="risk-badge">Hesaplanıyor</span>
+            <h2 class="score-heading" id="score-heading">Genel Risk Durumu</h2>
+            <p class="doc-summary" id="doc-summary">Özet hazırlanıyor...</p>
+          </div>
+        </div>
+
+        <!-- Verification Stats Bar -->
+        <div class="verification-stats-box" id="verification-stats-box">
+          <div class="stat-item">
+            <span class="stat-icon">🎯</span>
+            <span class="stat-label">Doğrulama Oranı:</span>
+            <span class="stat-val" id="stat-rate">%100</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon">📜</span>
+            <span class="stat-label">Doğrulanan Alıntı:</span>
+            <span class="stat-val" id="stat-verified">0/0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Category Filter Pills -->
+      <div class="category-filters" id="category-filters">
+        <button class="filter-pill active" data-category="all">Tümü (<span id="count-all">0</span>)</button>
+        <button class="filter-pill" data-category="Gizlilik">Gizlilik (<span id="count-gizlilik">0</span>)</button>
+        <button class="filter-pill" data-category="Otomatik Yenileme">Abonelik (<span id="count-abonelik">0</span>)</button>
+        <button class="filter-pill" data-category="Fikri Mülkiyet">Telif (<span id="count-telif">0</span>)</button>
+        <button class="filter-pill" data-category="Yargı Yetkisi">Yargı (<span id="count-yargi">0</span>)</button>
+      </div>
+
+      <!-- Risky Clauses List -->
+      <section class="clauses-section">
+        <h3 class="section-title">Tespit Edilen Riskli Maddeler</h3>
+        <div id="clauses-list" class="clauses-list">
+          <!-- Dynamically populated clause cards -->
+        </div>
+      </section>
+
+      <!-- Ambiguity / Edge Case Notes Box -->
+      <div id="ambiguity-box" class="ambiguity-box hidden">
+        <div class="ambiguity-header">
+          <span class="ambiguity-icon">⚖️</span>
+          <strong>Muğlak / Yorum Gerektiren İfadeler:</strong>
+        </div>
+        <p id="ambiguity-text" class="ambiguity-text"></p>
+      </div>
+    </main>
+
+    <!-- Empty Initial State -->
+    <div id="empty-state" class="empty-state">
+      <div class="empty-icon">📄</div>
+      <h3>Henüz Analiz Yapılmadı</h3>
+      <p>Kullanım Şartları veya Gizlilik Politikası içeren herhangi bir sayfadayken yukarıdaki <strong>"Sözleşmeyi Analiz Et"</strong> butonuna tıklayın.</p>
+      <div class="feature-pills">
+        <span>🛡️ Anti-Hallucination</span>
+        <span>🔒 Prompt Injection Koruması</span>
+        <span>⚡ Deterministik Doğrulama</span>
+      </div>
+    </div>
+
+    <!-- Mandatory Legal Disclaimer -->
+    <footer class="legal-footer">
+      <div class="disclaimer-badge">Hukuki Bilgilendirme</div>
+      <p class="disclaimer-text" id="mandatory-disclaimer">
+        Bu rapor yapay zeka tarafından üretilmiştir ve hukuki tavsiye niteliği taşımaz.
+      </p>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>⚙️ Yapılandırma & API</h3>
+          <button id="btn-close-modal" class="icon-btn-sm" aria-label="Kapat">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="provider-select">Yapay Zeka Motoru:</label>
+            <select id="provider-select" class="form-control">
+              <option value="mock">Dahili Mock Motor (Çevrimdışı / Ücretsiz Test)</option>
+              <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+              <option value="gemini">Google Gemini (Gemini 1.5 Pro / Flash)</option>
+              <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="api-key-group">
+            <label for="api-key-input">API Anahtarı:</label>
+            <input type="password" id="api-key-input" class="form-control" placeholder="sk-..." autocomplete="off">
+            <small class="helper-text">Anahtarınız yalnızca tarayıcınızın yerel depolama alanında (local storage) saklanır.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="model-input">Model Adı (Opsiyonel):</label>
+            <input type="text" id="model-input" class="form-control" placeholder="Varsayılan model kullanılır">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-save-settings" class="primary-btn">Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

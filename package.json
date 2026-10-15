@@ -1,0 +1,29 @@
+{
+  "name": "legal-shield-ai-extension",
+  "version": "1.0.0",
+  "description": "Chrome Extension (Manifest V3) with Page-Agent integration, Deterministic Verification (Anti-Hallucination), and Prompt Injection Defense for analyzing Terms of Service and Privacy Policies.",
+  "main": "background.js",
+  "type": "module",
+  "scripts": {
+    "eval": "node eval/eval.js",
+    "serve": "node scripts/serve.js",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "node scripts/run-e2e.js",
+    "generate-icons": "node scripts/generate-icons.js"
+  },
+  "keywords": [
+    "chrome-extension",
+    "manifest-v3",
+    "page-agent",
+    "anti-hallucination",
+    "prompt-injection-defense",
+    "sidepanel",
+    "legal-ai"
+  ],
+  "author": "Antigravity AI Engineer",
+  "license": "MIT",
+  "devDependencies": {
+    "cypress": "^13.15.0"
+  }
+}

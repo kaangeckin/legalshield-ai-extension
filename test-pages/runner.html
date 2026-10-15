@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>LegalShield AI - E2E Test Harness & Runner</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: flex; height: 100vh; overflow: hidden; background: #0f172a; color: #fff; }
+    .page-viewport { flex: 1; display: flex; flex-direction: column; border-right: 2px solid #334155; }
+    .viewport-header { background: #1e293b; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; font-size: 13px; }
+    .scenario-select { background: #0f172a; color: #fff; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; }
+    iframe#page-frame { flex: 1; border: none; background: #fff; width: 100%; height: 100%; }
+    .extension-panel-container { width: 380px; min-width: 380px; height: 100vh; background: #0f172a; display: flex; flex-direction: column; }
+    iframe#panel-frame { width: 100%; height: 100%; border: none; }
+  </style>
+</head>
+<body>
+  <!-- Left Side: Target Web Page Under Inspection -->
+  <div class="page-viewport">
+    <div class="viewport-header">
+      <div>
+        <strong>🌐 Test Edilen Web Sayfası:</strong>
+        <span id="current-url-display">Yükleniyor...</span>
+      </div>
+      <div>
+        <label for="scenario-dropdown">Senaryo Seç:</label>
+        <select id="scenario-dropdown" class="scenario-select">
+          <option value="happy-path.html">Senaryo 1: Happy Path (SaaS ToS)</option>
+          <option value="ambiguous-edge.html">Senaryo 2: Muğlaklık / Anti-Hallucination</option>
+          <option value="prompt-injection.html">Senaryo 3: Prompt Injection Saldırısı</option>
+        </select>
+      </div>
+    </div>
+    <div style="flex:1; display:flex;">
+      <iframe id="page-frame"></iframe>
+    </div>
+  </div>
+
+  <!-- Right Side: Chrome Extension SidePanel Mock Viewport -->
+  <div class="extension-panel-container">
+    <iframe id="panel-frame" src="../sidepanel/sidepanel.html"></iframe>
+  </div>
+
+  <script type="module">
+    import { PageAgent } from '../content/page_agent.js';
+    import { PageHighlighter } from '../content/highlighter.js';
+    import { LLMService } from '../lib/llm_service.js';
+    import { DeterministicValidator } from '../lib/validator.js';
+
+    const pageFrame = document.getElementById('page-frame');
+    const panelFrame = document.getElementById('panel-frame');
+    const scenarioDropdown = document.getElementById('scenario-dropdown');
+    const currentUrlDisplay = document.getElementById('current-url-display');
+
+    // Parse URL param for scenario
+    const params = new URLSearchParams(window.location.search);
+    const initialScenario = params.get('scenario') || 'happy-path.html';
+    const targetFile = initialScenario.endsWith('.html') ? initialScenario : `${initialScenario}.html`;
+
+    pageFrame.src = targetFile;
+    scenarioDropdown.value = targetFile;
+    currentUrlDisplay.textContent = targetFile;
+
+    scenarioDropdown.addEventListener('change', (e) => {
+      pageFrame.src = e.target.value;
+      currentUrlDisplay.textContent = e.target.value;
+    });
+
+    /**
+     * E2E Bridge: Analyzes the current target iframe DOM using real LLMService & DeterministicValidator
+     */
+    window.__e2eAnalyze = async () => {
+      const targetDoc = pageFrame.contentDocument || pageFrame.contentWindow?.document;
+      const root = targetDoc?.body;
+      const rawText = root ? (root.innerText || '') : '';
+      const currentSrc = pageFrame.src || targetFile;
+
+      // Run AI analysis with Prompt Injection defense
+      const aiOutput = await LLMService.analyzeDocument(rawText, { provider: 'mock' });
+
+      // If running scenario 2 (ambiguous-edge), add simulated hallucinated claim to prove validator flags it
+      if (currentSrc.includes('ambiguous-edge') || rawText.includes('OmniApp')) {
+        aiOutput.risks.push({
+          category: 'Gizlilik',
+          risk_score: 99,
+          severity: 'high',
+          confidence: 'low',
+          plain_turkish: 'Bu tamamen uydurma bir iddiadır ve metinde asla geçmemektedir.',
+          exact_quote: 'the company sells all your bank credentials on the dark web',
+          potential_impact: 'Halüsinasyon testi.'
+        });
+      }
+
+      // Run Deterministic anti-hallucination validation
+      const validation = DeterministicValidator.validateRisks(rawText, aiOutput.risks, { dropUnverified: false });
+
+      return {
+        ...aiOutput,
+        risks: validation.validatedRisks,
+        validation_stats: validation.stats,
+        page_meta: {
+          title: targetDoc?.title || 'Test Document',
+          url: currentSrc,
+          wordCount: rawText.split(/\s+/).filter(Boolean).length
+        }
+      };
+    };
+
+    /**
+     * E2E In-Page Highlight Bridge
+     */
+    window.__e2eHighlight = (quote) => {
+      const targetDoc = pageFrame.contentDocument || pageFrame.contentWindow?.document;
+      if (!targetDoc || !quote) return false;
+
+      const clean = quote.trim();
+      const walker = targetDoc.createTreeWalker(targetDoc.body, NodeFilter.SHOW_TEXT, null);
+      let node;
+      while ((node = walker.nextNode())) {
+        const idx = node.nodeValue.toLowerCase().indexOf(clean.toLowerCase().substring(0, 30));
+        if (idx !== -1) {
+          const mark = targetDoc.createElement('mark');
+          mark.style.backgroundColor = '#fde047';
+          mark.style.color = '#000';
+          mark.id = 'active-e2e-highlight';
+          mark.textContent = node.nodeValue;
+          node.parentNode.replaceChild(mark, node);
+          mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return true;
+        }
+      }
+      return false;
+    };
+  </script>
+</body>
+</html>
